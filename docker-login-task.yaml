@@ -16,10 +16,10 @@ spec:
         - name: DOCKER_USERNAME
           valueFrom:
             secretKeyRef:
-              name: docker-hub-secret
-              key: username  # Hace referencia al campo "username" dentro del Secret "docker-hub-secret"
+              name: docker-registry-secret  # Nombre del Secret
+              key: username  # La clave correcta dentro del Secret
         - name: DOCKER_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: docker-hub-secret
-              key: password  # Hace referencia al campo "password" dentro del Secret "docker-hub-secret"
+              name: docker-registry-secret  # Nombre del Secret
+              key: password  # La clave correcta dentro del Secret

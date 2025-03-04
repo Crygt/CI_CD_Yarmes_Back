@@ -3,30 +3,31 @@ kind: Task
 metadata:
   name: build-docker-image
 spec:
-  workspaces:
-    - name: source
   params:
     - name: IMAGE
       type: string
+    - name: GIT_REVISION
+      type: string
+      default: "master"
+  workspaces:
+    - name: source
   steps:
     - name: build-and-push
       image: gcr.io/kaniko-project/executor:latest
-      script: |
-        #!/bin/sh
-        set -ex
-        /kaniko/executor --context=/workspace/source \
-          --dockerfile=/workspace/source/Dockerfile \
-          --destination=$(params.IMAGE) \
-          --cache=true \
-          --skip-tls-verify
-      env:
-        - name: DOCKER_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: docker-registry-secret
-              key: username
-        - name: DOCKER_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: docker-registry-secret
-              key: password
+      workingDir: /workspace/source/Prueba-CI_CD
+      command:
+        - /kaniko/executor
+      args:
+        - "--context=/workspace/source/Prueba-CI_CD"
+        - "--dockerfile=/workspace/source/Prueba-CI_CD/Dockerfile"
+        - "--destination=$(params.IMAGE)"
+        - "--cache=true"
+        - "--skip-tls-verify"
+      securityContext:
+        runAsUser: 0
+      volumeMounts:
+        - name: docker-config
+          mountPath: /kaniko/.docker
+  volumes:
+    - name: docker-config
+      emptyDir: {}

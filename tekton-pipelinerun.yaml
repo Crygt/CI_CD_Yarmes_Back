@@ -4,9 +4,12 @@ metadata:
   name: build-and-deploy-run
 spec:
   pipelineRef:
-    name: build-and-deploy-api  # Nombre del pipeline que deseas ejecutar
+    name: build-and-deploy-api
   serviceAccountName: tekton-pipeline-sa
+  params:
+    - name: IMAGE
+      value: crygt/visits-api:latest  # Debe coincidir con la imagen esperada en Docker Hub
   workspaces:
     - name: source
       persistentVolumeClaim:
-        claimName: pipeline-pvc  # Debe coincidir con el claimName del PVC para el código fuente
+        claimName: my-pvc

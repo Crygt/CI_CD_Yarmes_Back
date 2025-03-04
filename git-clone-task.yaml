@@ -9,10 +9,15 @@ spec:
     - name: url
       type: string
       description: "URL del repositorio a clonar"
+      default: "https://github.com/Crygt/Prueba-CI_CD.git"
+    - name: revision
+      type: string
+      description: "Rama del repositorio a clonar"
+      default: "master"  # Asegúrate de que sea "master"
     - name: subdirectory
       type: string
       description: "Directorio donde clonar el repo"
-      default: ""
+      default: "Prueba-CI_CD"
   steps:
     - name: step-git-clone
       image: gcr.io/cloud-builders/git
@@ -22,14 +27,13 @@ spec:
         rm -rf "$(workspaces.source.path)/$(params.subdirectory)"
         mkdir -p "$(workspaces.source.path)/$(params.subdirectory)"
         echo "✅ Directorio limpio. Clonando el repositorio..."
-        git clone "$(params.url)" "$(workspaces.source.path)/$(params.subdirectory)"
-      securityContext:
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop:
-            - ALL
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        seccompProfile:
-          type: RuntimeDefault
+        git clone --branch "$(params.revision)" "$(params.url)" "$(workspaces.source.path)/$(params.subdirectory)"
+      
+    - name: debug-list-files
+      image: alpine
+      script: |
+        #!/bin/sh
+        echo "📂 Listando archivos en /workspace/source/ ..."
+        ls -l /workspace/source/
+        echo "🔍 Buscando Dockerfile..."
+        find /workspace/source/ -name "Dockerfile"
