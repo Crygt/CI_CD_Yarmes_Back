@@ -2,6 +2,7 @@ pipeline {
   agent any
 
   stages {
+
     stage('Checkout') {
       steps {
         checkout scm
@@ -21,5 +22,12 @@ pipeline {
         sh 'npm test || echo "no tests defined"'
       }
     }
+
+    stage('Build Docker Image') {
+      steps {
+        sh 'docker build -t visits-api:latest .'
+      }
+    }
+
   }
 }
