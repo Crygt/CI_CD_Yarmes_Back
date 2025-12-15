@@ -1,12 +1,16 @@
 pipeline {
   agent any
 
+  environment {
+    IMAGE = "visits-api:latest"
+    CONTAINER = "visits-api"
+    PORT = "3001"
+  }
+
   stages {
 
     stage('Checkout') {
-      steps {
-        checkout scm
-      }
+      steps { checkout scm }
     }
 
     stage('Install') {
@@ -24,17 +28,29 @@ pipeline {
     }
 
     stage('Build Docker Image') {
-      agent {
-        docker {
-          image 'docker:24-cli'
-          args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-      }
       steps {
-        sh 'docker version'
-        sh 'docker build -t visits-api:latest .'
+        sh 'docker build -t $IMAGE .'
       }
     }
 
+    stage('Run Container') {
+      steps {
+        sh 'docker rm -f $CONTAINER || true'
+        sh 'docker run -d --name $CONTAINER -p $PORT:$PORT --env-file .env $IMAGE'
+      }
+    }
+
+    stage('Healthcheck') {
+      steps {
+        sh 'sleep 3'
+        sh 'curl -f http://localhost:$PORT/visits || (docker logs $CONTAINER && exit 1)'
+      }
+    }
+  }
+
+  post {
+    always {
+      sh 'docker ps -a | head -n 20 || true'
+    }
   }
 }
